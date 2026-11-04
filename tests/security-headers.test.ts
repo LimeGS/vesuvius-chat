@@ -1,0 +1,21 @@
+import { expect, test } from "vitest";
+import { secureRequest, secureResponse } from "../lib/security-headers";
+test("each request replaces attacker policies with a fresh nonce and hardens HTML responses", () => {
+  const request = new Request("https://chat.example/", { headers: { "Content-Security-Policy": "script-src 'unsafe-inline'", "x-nonce": "attacker" } });
+  const first = secureRequest(request);
+  const second = secureRequest(request);
+  const csp = first.headers.get("content-security-policy")!;
+  expect(csp).not.toContain("attacker");
+  expect(csp).toContain("script-src 'nonce-");
+  expect(csp).toContain("'strict-dynamic'");
+  expect(csp).not.toContain("script-src 'unsafe-inline'");
+  expect(csp).not.toBe(second.headers.get("content-security-policy"));
+  const response = secureResponse(new Response("html", { headers: { "Content-Type": "text/html" } }), first);
+  expect(response.headers.get("content-security-policy")).toBe(csp);
+  expect(response.headers.get("x-frame-options")).toBe("DENY");
+  expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+  expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect(response.headers.get("strict-transport-security")).toBeTruthy();
+  expect(secureResponse(new Response("asset"), secureRequest(new Request("http://127.0.0.1/font"))).headers.has("strict-transport-security")).toBe(false);
+});

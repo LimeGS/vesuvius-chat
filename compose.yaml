@@ -1,0 +1,61 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      APP_ORIGIN: https://${APP_HOST:-localhost:8443}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?Set your OpenRouter key}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:?Set your chosen model}
+      CHAT_TIME_ZONE: ${CHAT_TIME_ZONE:-UTC}
+    volumes:
+      - access:/state
+    networks: [private]
+  rag:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.rag
+    restart: unless-stopped
+    network_mode: service:app
+    depends_on: [app]
+    environment:
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID:?Set your Discord guild ID}
+    volumes:
+      - index:/data/bundle:ro
+      - models:/data/bundle/models:ro
+  refresh:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.rag
+    restart: unless-stopped
+    command: [python, -B, docker/refresh.py]
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN:?Set your Discord bot token}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID:?Set your Discord guild ID}
+      DISCORD_CHANNEL_IDS: ${DISCORD_CHANNEL_IDS:?Set comma-separated channel IDs}
+    volumes:
+      - raw:/data/raw
+      - index:/data/bundle
+      - models:/data/bundle/models
+    networks: [private]
+  proxy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.proxy
+    restart: unless-stopped
+    depends_on: [app]
+    environment:
+      APP_HOST: ${APP_HOST:-localhost:8443}
+      NGINX_ENVSUBST_FILTER: APP_HOST
+    ports:
+      - "127.0.0.1:${HTTPS_PORT:-8443}:8443"
+    volumes:
+      - tls:/tls
+    networks: [private]
+networks:
+  private:
+volumes:
+  access:
+  raw:
+  index:
+  models:
+  tls:

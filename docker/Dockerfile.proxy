@@ -1,0 +1,6 @@
+FROM nginx:1.28-alpine
+RUN apk add --no-cache openssl
+COPY docker/proxy.conf.template /etc/nginx/templates/default.conf.template
+COPY docker/proxy-entrypoint.sh /docker-entrypoint.d/10-local-tls.sh
+COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/licenses/vesuvius-rag-chat/
+RUN chmod 755 /docker-entrypoint.d/10-local-tls.sh

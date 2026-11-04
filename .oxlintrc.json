@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "jsx-a11y", "nextjs", "import"],
+  "categories": { "correctness": "error" },
+  "rules": { "react/rules-of-hooks": "error", "react/exhaustive-deps": "error", "jsx-a11y/prefer-tag-over-role": "off" },
+  "ignorePatterns": ["node_modules/**", ".next/**", "dist/**", "coverage/**", ".vinext/**", ".wrangler/**", ".sites-runtime/**", "vendor/**", "outputs/**", "work/**"],
+  "overrides": [{ "files": ["components/ui/**/*.{ts,tsx}", "hooks/use-mobile.ts"], "rules": { "typescript/no-unused-vars": "off", "react/set-state-in-effect": "off", "jsx-a11y/anchor-has-content": "off", "jsx-a11y/click-events-have-key-events": "off", "jsx-a11y/no-noninteractive-element-interactions": "off" } }]
+}

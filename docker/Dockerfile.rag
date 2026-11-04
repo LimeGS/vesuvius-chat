@@ -1,0 +1,13 @@
+FROM python:3.12-slim-bookworm
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HUB_DISABLE_TELEMETRY=1 HF_HUB_DISABLE_PROGRESS_BARS=1 TOKENIZERS_PARALLELISM=false OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 RAG_BUNDLE_DIR=/data/bundle
+WORKDIR /app
+COPY rag/requirements.txt ./rag/requirements.txt
+COPY docker/requirements.txt ./docker/requirements.txt
+RUN pip install --no-cache-dir torch==2.8.0 --index-url ${TORCH_INDEX_URL} && pip install --no-cache-dir -r docker/requirements.txt
+COPY rag/*.py ./rag/
+COPY docker/*.py ./docker/
+COPY LICENSE THIRD_PARTY_NOTICES.md ./
+RUN mkdir -p /data/bundle/models /data/raw && chown -R 1000:1000 /data
+USER 1000:1000
+CMD ["python", "-B", "docker/bootstrap.py"]
