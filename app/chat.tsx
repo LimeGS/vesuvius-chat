@@ -18,7 +18,7 @@ function inline(text: string, sources: ChatSource[]): ReactNode[] {
     const piece = match[0];
     parts.push(text.slice(cursor, match.index));
     if (match[1]) parts.push(<code key={match.index}>{piece.slice(match[1].length, -match[1].length)}</code>);
-    else if (piece.startsWith("**")) parts.push(<strong key={match.index}>{piece.slice(2, -2)}</strong>);
+    else if (piece.startsWith("**")) parts.push(<strong key={match.index}>{inline(piece.slice(2, -2), sources)}</strong>);
     else {
       const number = Number(piece.slice(1, -1)); const source = sources[number - 1]; const href = safeUrl(source?.url);
       parts.push(href ? <a key={match.index} className="citation" href={href} target="_blank" rel="noreferrer noopener" title={source.date ? `Posted ${source.date}` : "Date unavailable"} aria-label={`Source ${number}: ${source.title}${source.date ? ` (posted ${source.date})` : ""}`}>{number}</a> : piece);
@@ -31,13 +31,30 @@ function inline(text: string, sources: ChatSource[]): ReactNode[] {
 function Answer({ text, sources }: { text: string; sources: ChatSource[] }) {
   return <div className="answer-text">{text.split(/(```[\s\S]*?(?:```|$))/g).map((section, si) => {
     if (section.startsWith("```")) return <pre key={si}><code>{section.replace(/^```[^\n]*\n?/, "").replace(/```$/, "")}</code></pre>;
-    return section.split(/\n\s*\n/).filter(Boolean).map((block, i) => {
-      const lines = block.trim().split("\n"); const key = `${si}-${i}`;
-      if (lines.every(line => /^[-*]\s/.test(line))) return <ul key={key}>{lines.map((line, j) => <li key={j}>{inline(line.replace(/^[-*]\s+/, ""), sources)}</li>)}</ul>;
-      if (lines.every(line => /^\d+\.\s/.test(line))) return <ol key={key}>{lines.map((line, j) => <li key={j}>{inline(line.replace(/^\d+\.\s+/, ""), sources)}</li>)}</ol>;
-      if (/^#{1,4}\s/.test(block)) return <h3 key={key}>{inline(block.replace(/^#{1,4}\s+/, ""), sources)}</h3>;
-      return <p key={key}>{lines.map((line, j) => <span key={j}>{j > 0 && <br />}{inline(line, sources)}</span>)}</p>;
-    });
+    const lines = section.trim().split("\n"), blocks: ReactNode[] = [];
+    for (let i = 0; i < lines.length;) {
+      const line = lines[i], key = `${si}-${i}`;
+      if (!line.trim()) { i++; continue; }
+      if (/^#{1,6}\s/.test(line)) {
+        blocks.push(<h3 key={key}>{inline(line.replace(/^#{1,6}\s+/, ""), sources)}</h3>); i++; continue;
+      }
+      if (/^>\s?/.test(line)) {
+        const quote: string[] = [];
+        while (i < lines.length && /^>\s?/.test(lines[i])) quote.push(lines[i++].replace(/^>\s?/, ""));
+        blocks.push(<blockquote key={key}>{inline(quote.join(" "), sources)}</blockquote>); continue;
+      }
+      const ordered = /^\d+\.\s/.test(line);
+      if (ordered || /^[-*]\s/.test(line)) {
+        const pattern = ordered ? /^\d+\.\s+/ : /^[-*]\s+/;
+        const items: ReactNode[] = [];
+        while (i < lines.length && pattern.test(lines[i])) items.push(<li key={i}>{inline(lines[i++].replace(pattern, ""), sources)}</li>);
+        blocks.push(ordered ? <ol key={key} start={Number.parseInt(line, 10)}>{items}</ol> : <ul key={key}>{items}</ul>); continue;
+      }
+      const paragraph: string[] = [lines[i++]];
+      while (i < lines.length && lines[i].trim() && !/^(?:#{1,6}\s|>\s?|[-*]\s|\d+\.\s)/.test(lines[i])) paragraph.push(lines[i++]);
+      blocks.push(<p key={key}>{paragraph.map((text, j) => <span key={j}>{j > 0 && <br />}{inline(text, sources)}</span>)}</p>);
+    }
+    return blocks;
   })}</div>;
 }
 

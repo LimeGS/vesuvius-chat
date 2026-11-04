@@ -16,7 +16,7 @@ const browserPath = process.env.BROWSER_EXECUTABLE || "chromium";
 const viewports = [[280,653],[320,568],[375,667],[390,844],[430,932],[768,1024],[1024,768],[1440,900],[1920,1080],[2560,1440],[844,390],[390,300]];
 const longWord = "unbroken".repeat(70);
 const answer = `### What the evidence supports\n\nThis is a **synthetic layout fixture**, not a model response. Readable paragraphs and citations should fit inside a rounded assistant bubble. [1]\n\n- **Evidence:** wrap naturally across screen sizes.\n- **Uncertainty:** keep controls reachable while the conversation scrolls.\n- **Next step:** inspect source details without widening the page.\n\n${Array.from({length:5}, () => "A long research answer needs comfortable spacing, clear emphasis, and a stable reading width on both small phones and wide desktop screens.").join("\n\n")}\n\nA long token: ${longWord}\n\n\`\`\`javascript\nconst oversizedLine = "${"code".repeat(100)}";\n\`\`\`\n\nA final paragraph with a source. [1]`;
-const reply = { mode: "live", rag: true, message: answer, sources: [{ id: "1", title: "Synthetic source with a long title " + longWord, url: "https://discord.com/channels/1/2/3", date: "2025-11-03" }, { id: "2", title: "Synthetic undated source" }] };
+const reply = { mode: "live", rag: true, message: answer + "\n\n### Limitations\n- Coverage ends at `2026-11-04T00:44:02Z`.\n- More posts may exist.\n\n> A quoted update [1].", sources: [{ id: "1", title: "Synthetic source with a long title " + longWord, url: "https://discord.com/channels/1/2/3", date: "2025-11-03" }, { id: "2", title: "Synthetic undated source" }] };
 let app, browser, socket, fixture, releaseReply, signedIn = false, failNextChat = false, failNextLogout = false, holdNextReply = false, nextId = 0;
 const pending = new Map();
 const failures = [], results = [];
@@ -108,6 +108,9 @@ async function geometry(label, width, height, enlarged = false) {
     check(contrast(metrics.user.color, metrics.user.background) >= 4.5, `${prefix}: user text contrast below 4.5:1`);
     check(metrics.code.scrollWidth > metrics.code.clientWidth && metrics.code.right <= metrics.assistant.right + 1, `${prefix}: code does not scroll inside its bubble`);
     check(metrics.assistant.font >= (enlarged ? 32 : 16) - .1 && metrics.assistant.font <= (enlarged ? 38 : 19) + .1, `${prefix}: body text outside fluid font range`);
+    const typography = await evaluate(`(() => { const body = getComputedStyle(document.querySelector('.answer-text')), heading = getComputedStyle(document.querySelector('.answer-text h3')), code = getComputedStyle(document.querySelector('.answer-text li code')); return { bodySize:body.fontSize, headingSize:heading.fontSize, codeSize:code.fontSize, bodyFont:body.fontFamily, codeFont:code.fontFamily, quote:document.querySelector('.answer-text blockquote')?.textContent, headings:[...document.querySelectorAll('.answer-text h3')].map(e => e.textContent) }; })()`);
+    check(typography.bodySize === typography.headingSize && typography.bodySize === typography.codeSize && typography.bodyFont === typography.codeFont, `${prefix}: response typography is inconsistent`);
+    check(typography.quote === "A quoted update 1." && typography.headings.includes("Limitations"), `${prefix}: adjacent Markdown blocks are not separated`);
   }
   results.push({ viewport:[width,height], state:label, font:metrics.input?.font, horizontalOverflow:metrics.documentWidth > metrics.width + 1 });
 }

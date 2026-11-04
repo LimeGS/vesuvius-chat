@@ -135,6 +135,20 @@ test("answers render supported Markdown as safe React text, not raw HTML", async
   expect(screen.getByText(/<script>/)).toBeTruthy();
 });
 
+test("adjacent Markdown blocks keep headings, quotes and lists separate with working nested citations", async () => {
+  api({ ...success, message: "### Limitations\n* Coverage ends at `2026-11-04T00:44:02Z`.\n* More posts may exist.\n\n**Latest post [1]**\n> A quoted update [1].\n> Another quoted line.\n\nNormal body text." });
+  const { container } = render(<Home />); submit();
+  const heading = await screen.findByRole("heading", { name: "Limitations" });
+  expect(heading.textContent).toBe("Limitations");
+  expect(heading.querySelector("li,code")).toBeNull();
+  expect(container.querySelectorAll(".answer-text li")).toHaveLength(2);
+  expect(container.querySelector("blockquote")?.textContent).toContain("A quoted update");
+  expect(container.querySelector("blockquote")?.textContent).not.toContain(">");
+  expect(container.querySelector("strong .citation")).toBeTruthy();
+  expect(container.querySelector("li code")?.textContent).toBe("2026-11-04T00:44:02Z");
+  expect(screen.getAllByRole("link", { name: "Source 1: Anuncio" })).toHaveLength(2);
+});
+
 test("unsafe, malformed and absent source URLs never become links", async () => {
   api({ ...success, message: "Fuentes [1] [2] [3] [4]", sources: [{ id: "1", title: "Unsafe", url: "javascript:alert(1)" }, { id: "2", title: "Missing" }, { id: "3", title: "Malformed", url: "not a url" }, { id: "4", title: "HTTPS", url: "https://example.com/doc" }] });
   render(<Home />); submit();

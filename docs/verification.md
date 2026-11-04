@@ -5,10 +5,10 @@ GitHub status or a promise that future dependency audits will remain clean.
 
 | Application metric | Coverage |
 | --- | --- |
-| lines | 99.06% |
-| statements | 96.37% |
-| branches | 94.49% |
-| functions | 97.29% |
+| lines | 99.07% |
+| statements | 96.35% |
+| branches | 94.48% |
+| functions | 97.24% |
 
 All four metrics exceed **90%**. Scope: executable application/lib/proxy TypeScript
 covered by Vitest; Python backend tests run separately and are not included in this
