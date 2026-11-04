@@ -1,5 +1,3 @@
-![Vesuvius Challenge RAG Chat interface](docs/images/chat-preview.png)
-
 # Vesuvius RAG Chat
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -8,6 +6,8 @@
 
 Search your Discord research archive through a web chat or your AI agent.
 Self-host the complete stack with Docker and your own API keys.
+
+![Vesuvius Challenge RAG Chat interface](docs/images/chat-preview.png)
 
 ## Quick start
 
