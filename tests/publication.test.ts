@@ -26,6 +26,23 @@ test("publication scan accepts synthetic examples and refuses private material w
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });
 
+test("publication scan accepts only the reviewed screenshot bytes, not arbitrary image data", () => {
+  const directory = mkdtempSync(join(tmpdir(), "publication-image-test-"));
+  const run = () => spawnSync(process.execPath, [resolve("scripts/check-publication.mjs"), directory], { encoding: "utf8" });
+  try {
+    mkdirSync(join(directory, "docs/images"), { recursive: true });
+    const image = readFileSync("docs/images/chat-preview.png");
+    const target = join(directory, "docs/images/chat-preview.png");
+    writeFileSync(target, image);
+    expect(run().status).toBe(0);
+    writeFileSync(target, Buffer.concat([image, Buffer.from("PRIVATE_SENTINEL")]));
+    expect(run().status).toBe(1);
+    rmSync(target);
+    writeFileSync(join(directory, "docs/images/unreviewed.png"), image);
+    expect(run().status).toBe(1);
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
+
 test("release badges require measured coverage above 90 percent and a clean audit", () => {
   const directory = mkdtempSync(join(tmpdir(), "badge-test-"));
   const run = () => spawnSync(process.execPath, [resolve("scripts/update-badges.mjs")], { cwd: directory, encoding: "utf8" });

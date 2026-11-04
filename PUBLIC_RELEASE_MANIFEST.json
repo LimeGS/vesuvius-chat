@@ -7,7 +7,7 @@
     ".oxlintrc.json": "b9007990cdb1ec8477ba31c7a1fc1441791deaa67f0d2a05f84663c748a9ea2c",
     "Dockerfile": "56379aba13f1dbad65db15e7e9387edf8015f93c3645cd5defb9d06ee632eb54",
     "LICENSE": "3a423123c866c038be836b5715785ea12850727e23a5d336c1606a976d6df77c",
-    "README.md": "977c35dbea43b362bb331e22fafb27f0ff402bee43c774be0392d2148cb5a1c3",
+    "README.md": "849b8be52d2028ec2f5830b3ffe631de01af7a14498e4018b0bf2cd7a43732a5",
     "SECURITY.md": "64989bb014a18d970949f67e977f54e2971bc431555aedd894515ebc680e157c",
     "THIRD_PARTY_NOTICES.md": "57c65ee90ce1a1ef145467ca24758b1f2f604a15da3177b52aa1d94c02efb68a",
     "app/api/chat/route.ts": "49fd4686102e02bde1ecb8b53a620dd302e756e34c3ccf9a3f0e325a1437924b",
@@ -98,6 +98,7 @@
     "docker/requirements.txt": "0c8d0f32ec9cb10cd78809dc7ebd29beb1700c23d89d1c6b61c5a46b78385ae8",
     "docs/badges/audit.svg": "fe063b13b5f0549ed0816e82122bddb34f5ea008510dad7b0a4063d366e49a5e",
     "docs/badges/coverage.svg": "05664556a04b74dcfef3a0ddf4b69f6bf3c373fa337f49972c3a4693b8ae18a5",
+    "docs/images/chat-preview.png": "f968d425194124117f46892f19c0af6c3e72260bd29e22f1d05c1664d0353150",
     "docs/mcp.md": "5be4623519703d55cfe4f115e581a5ca7d1fad63e4651e63e632fe0633311ba6",
     "docs/self-hosting.md": "0040313ccb8af746c3191424bcd0538cb74bf0027783fe3b87035cfc310d486a",
     "docs/verification.md": "21ee4e9641de8f601e5a49f0950075477aaf2cd54ec73e398ee0922b2412a8d5",
@@ -142,7 +143,7 @@
     "rag/server.py": "b77dcbd6bdba7a3d1ce86b3663fa991049ffd6d2ec7fd0d07febf74cbeccd18e",
     "scripts/check-docker.mjs": "c6f6c1fe732b3045e5d81c811c83b9778e4d227e179e0304effb60571db5b771",
     "scripts/check-node.mjs": "bf20b29f468a7e18ab4204f51528f7a9d34ecf4aef44085f36e61008e7ab1938",
-    "scripts/check-publication.mjs": "3d7e91a994eb58b326e608c106746d74422f174f4e8d739ae73fa364708119a5",
+    "scripts/check-publication.mjs": "e7da377fbcc6dd23e0fe3c97b6abe83743685d7c24e545f98c1b6a9e4aae2d46",
     "scripts/check-rag-backends.ts": "04d1359282a8110e5f93d22546f7fcccae38ba870617b736bd558584ce5f2e2a",
     "scripts/check-rag.ts": "f5d69a77362ec27504298f3c1cb7bcd5cf542b02b3c58d4bc3b9fcfa301ae6ef",
     "scripts/check-responsive.mjs": "1b66ecc302513e4381649506e2c785adc25618f01f6b315f4ff8e753add0ce72",
@@ -180,7 +181,7 @@
     "tests/page.test.tsx": "cafba71c34839f46c9b0c54b28ee2bf9f4aa4e0897d3d44cbebef2d8c3b724b4",
     "tests/provider-errors.test.ts": "e0bbbf33d63a67c752608e2d45762d33aba1e2adb4bd7429826cd9a2abc4159f",
     "tests/proxy.test.ts": "bb1e13790f650587ee4592765cb3ab5e64d31d4e8a64ed4cb2440ffdd49f6aee",
-    "tests/publication.test.ts": "6a49dd557d73f6a84cbc1bd1ff9494ba3dbc0aa569e37e3d6204fdea69eaae3b",
+    "tests/publication.test.ts": "3435e1c29807a03fc2035f51b1ddca2f25578c8ce1521fc44db9b7c4529fcbb3",
     "tests/quota-store.test.ts": "36b6a02db6a8d65457b20b2b233e5012ccfee988614c6ea42f6237d6b86151a0",
     "tests/rag-benchmark.test.ts": "bdfcd571aeed9a127a040b0227eb95798bcc42849d82f23d00847d0e976189ec",
     "tests/rag-fallback.test.ts": "378290ffc641f8227f1dbafaf3317ba6bb86f06901369d07ca3df9834e26ecca",
@@ -202,7 +203,7 @@
   },
   "verification": {
     "verified": "2026-11-04",
-    "applicationTests": 513,
+    "applicationTests": 514,
     "pythonTests": 42,
     "coverage": {
       "lines": 99.06,
@@ -213,7 +214,8 @@
     "npmAuditVulnerabilities": 0,
     "publicationFindings": 0,
     "linuxBuildAndNativeIntegrationPassed": true,
-    "dockerSyntheticChecks": "Previous sanitized release passed; Docker smoke not rerun for these chat-only changes."
+    "dockerSyntheticChecks": "Previous sanitized release passed; Docker smoke not rerun for these chat-only changes.",
+    "readmeScreenshot": "Visually reviewed PNG; EXIF/text metadata removed; exact bytes allowlisted and tested."
   },
   "notice": "Source-only release. Required public third-party attribution is preserved. No private operational history, credentials or corpus data are included."
 }

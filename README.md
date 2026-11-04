@@ -1,3 +1,5 @@
+![Vesuvius Challenge RAG Chat interface](docs/images/chat-preview.png)
+
 # Vesuvius RAG Chat
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)

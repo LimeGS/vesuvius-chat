@@ -1,5 +1,6 @@
 // Source-only publication guard. Findings contain rule names and relative files, never values.
 import { readdir, readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { isIP } from "node:net";
 import { relative, resolve } from "node:path";
 
@@ -28,6 +29,8 @@ async function walk(directory) {
     if ((/^\.env(?:\.|$)/.test(entry.name) && entry.name !== ".env.example") || /(?:\.env|\.sqlite(?:-wal|-shm)?|\.db|\.npy|\.jsonl|\.pem|\.key|\.tgz|\.tar|\.zip|\.log|\.local\.json)$/.test(entry.name) || /^ssh[-_]/.test(entry.name)) add(file, "private-artifact");
     if (/\.woff2$/.test(file)) continue; // Redistributed fonts retain public upstream license notices.
     const buffer = await readFile(path);
+    // Visually reviewed screenshot with EXIF/text metadata removed; all other binaries still fail.
+    if (file === "docs/images/chat-preview.png" && createHash("sha256").update(buffer).digest("hex") === "f968d425194124117f46892f19c0af6c3e72260bd29e22f1d05c1664d0353150") continue;
     if (buffer.includes(0)) { add(file, "unreviewed-binary"); continue; }
     const text = buffer.toString("utf8");
     for (const [name, pattern] of rules) if (text.match(pattern)) add(file, name);
