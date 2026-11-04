@@ -40,6 +40,32 @@ function fixture(options: { status?: unknown; tools?: string[]; page?: (call: Ca
 }
 afterEach(() => { vi.useRealTimers(); });
 
+test.each([
+  ["What changed in ink detection?", "The contributor released a new ink map [1].\n\nThese are highlights from the available excerpts, not a complete ranking."],
+  ["¿Qué cambió en la detección de tinta?", "El autor publicó un nuevo mapa de tinta [1].\n\nSon hallazgos de los fragmentos disponibles, no una revisión exhaustiva."],
+])("partial research keeps the answer and its language without adding a second warning: %s", async (questionText, answer) => {
+  const { models } = fixture({ model: () => ({ choices: [{ finish_reason: "stop", message: { content: answer } }], usage: { completion_tokens: 60 } }) });
+  const reply = await answerChat(question(questionText), config({ MCP_RAG_RESEARCH: "1" }), AbortSignal.timeout(5000));
+  expect(reply.message).toBe(answer);
+  expect(reply.research).toMatchObject({ complete: false, absenceVerified: false, state: "partial", reviewed: 1 });
+  expect(reply.sources.map(source => source.id)).toEqual(["1"]);
+  expect(models).toHaveLength(1);
+});
+
+test("research distinguishes server-validated status from untrusted source content", async () => {
+  const { models } = fixture({ model: index => index === 1
+    ? { choices: [{ finish_reason: "tool_calls", message: { content: null, tool_calls: [{ id: "open-source", type: "function", function: { name: "get_message", arguments: '{"message_id":"10"}' } }] } }], usage: { completion_tokens: 30 } }
+    : { choices: [{ finish_reason: "stop", message: { content: "Finding [1]." } }], usage: { completion_tokens: 30 } },
+  });
+  await answerChat(question("What supports this ink finding?"), config({ MCP_RAG_RESEARCH: "1" }), AbortSignal.timeout(5000));
+  const userContext = models[0].messages.at(-1).content;
+  const metadata = userContext.split("SERVER-VALIDATED RESEARCH STATUS (JSON):\n")[1]?.split("\nCURRENT RESEARCH EVIDENCE (JSON):\n")[0];
+  expect(metadata).toBeDefined();
+  expect(JSON.parse(metadata)).toMatchObject({ scope: { timeZone: "UTC" }, research: { absenceVerified: false } });
+  expect(models[0].messages[0].content).toMatch(/source content.*untrusted/i);
+  expect(models[0].messages[0].content).toMatch(/server.*cannot.*widen/i);
+});
+
 test("a simple greeting does not search the corpus or display research warnings and citations", async () => {
   const { calls, models } = fixture({ model: () => ({ choices: [{ finish_reason: "stop", message: { content: "Hi! What would you like to explore?" } }], usage: { completion_tokens: 20 } }) });
   const reply = await answerChat(question("Hi"), config({ MCP_RAG_RESEARCH: "1" }), AbortSignal.timeout(5000));
@@ -149,6 +175,7 @@ test("bounded research opens a known message, refines a query, then answers usin
   expect(models).toHaveLength(3);
   expect(models[0].tools.map((tool: any) => tool.function.name)).toEqual(["search_messages", "list_messages", "get_message", "get_thread"]);
   expect(models[2]).not.toHaveProperty("tools");
+  expect(models[2].messages[0].content).toMatch(/No further tools are available.*answer now/i);
   expect(models.map(payload => payload.max_tokens)).toEqual([3200, 3150, 3100]);
   expect(models.every(payload => payload.model === "meta/muse-spark-1.3-contributor")).toBe(true);
   expect(reply.message).toContain("Refined answer");

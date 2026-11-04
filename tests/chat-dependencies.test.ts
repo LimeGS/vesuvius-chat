@@ -32,6 +32,10 @@ test.each(["disconnected", "empty", "evidence"])("%s retrieval sends English ins
   expect(new Headers(fetch.mock.calls[0][1]?.headers).get("X-OpenRouter-Title")).toBe("Vesuvius Challenge RAG Chat");
   expect(prompt).toContain("Answer in the language of the user's latest message unless they explicitly request another response language.");
   expect(prompt).toContain("The language of these instructions, retrieved evidence, search-query translations, or previous assistant replies must not determine the response language.");
+  expect(prompt).toContain("RESPONSE QUALITY");
+  expect(prompt).toMatch(/material limitations once.*after the findings/i);
+  expect(prompt).toMatch(/internal status fields.*unless.*requests/i);
+  expect(prompt).toMatch(/code\/data releases/);
   expect(payload.messages.slice(1)).toEqual(history);
   if (state === "disconnected") expect(prompt).toContain("No document knowledge base is connected.");
   if (state === "empty") expect(prompt).toContain("The document search found no excerpts.");
@@ -101,7 +105,7 @@ test("a new winding-fields request searches that topic before old lasagna contex
   expect(response.sources.map(source => source.title)).toEqual(["Winding", "Lasagna", "Shared", "Winding details", "Lasagna details"]);
   expect(response.sources.map(source => source.id)).toEqual(["1", "2", "3", "4", "5"]);
   const body = JSON.parse(String(fetch.mock.calls[0][1]?.body));
-  expect(body.messages[0].content).toMatch(/The server.*every turn/);
+  expect(body.messages[0].content).toMatch(/searches reported for this turn/i);
   expect(body.messages[0].content).toContain("RAG QUERIES PERFORMED");
   expect(body.messages[0].content).toContain("not excerpts supplied by the user");
   expect(body.messages.slice(1)).toEqual(history);

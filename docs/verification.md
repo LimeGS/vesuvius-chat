@@ -7,7 +7,7 @@ GitHub status or a promise that future dependency audits will remain clean.
 | --- | --- |
 | lines | 99.07% |
 | statements | 96.35% |
-| branches | 94.48% |
+| branches | 94.46% |
 | functions | 97.24% |
 
 All four metrics exceed **90%**. Scope: executable application/lib/proxy TypeScript
