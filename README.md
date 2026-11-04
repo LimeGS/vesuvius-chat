@@ -4,7 +4,7 @@
 [![Coverage](docs/badges/coverage.svg)](docs/verification.md)
 [![Dependency audit](docs/badges/audit.svg)](docs/verification.md)
 
-Search your Discord research archive through a web chat or your AI agent.
+Search the Discord research archive through a web chat or your AI agent.
 Self-host the complete stack with Docker and your own API keys.
 
 ![Vesuvius Challenge RAG Chat interface](docs/images/chat-preview.png)
