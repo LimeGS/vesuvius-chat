@@ -96,20 +96,23 @@ async function geometry(label, width, height, enlarged = false) {
   if (metrics.accessError && metrics.input) check(metrics.accessError.bottom <= metrics.input.y || metrics.accessError.y >= metrics.input.bottom, `${prefix}: access error covers the input`);
   if (metrics.assistant) {
     check(metrics.sourceDate === "2025-11-03" && metrics.unknownDate, `${prefix}: source dates or unknown-date label missing`);
-    check(metrics.assistant.radius >= 16, `${prefix}: assistant bubble is not rounded`);
+    check(metrics.assistant.radius <= 8, `${prefix}: assistant panel does not match the Journal's flat styling`);
+    check(metrics.assistant.background === "rgb(37, 45, 38)", `${prefix}: assistant panel does not use the Journal green`);
+    check(metrics.assistant.color === "rgb(238, 231, 212)", `${prefix}: assistant text does not use the Journal cream`);
+    check(contrast(metrics.assistant.color, metrics.assistant.background) >= 4.5, `${prefix}: assistant text contrast below 4.5:1`);
     check(metrics.assistant.background !== "rgba(0, 0, 0, 0)", `${prefix}: assistant bubble is transparent`);
     check(metrics.assistant.right <= metrics.main.right + 1, `${prefix}: assistant bubble escapes column`);
     check(metrics.conversation.height >= 24, `${prefix}: conversation has no usable scroll area`);
     check(metrics.conversation.scrollHeight > metrics.conversation.clientHeight, `${prefix}: long conversation is not independently scrollable`);
     check(metrics.conversation.bottom <= metrics.input.y + 1, `${prefix}: conversation overlaps composer`);
-    const channels = metrics.user.background.match(/[\d.]+/g).slice(0,3).map(Number);
-    check(channels[2] >= channels[0] + 25, `${prefix}: user bubble is not muted blue`);
-    check(metrics.user.radius >= 16, `${prefix}: user bubble is not rounded`);
+    check(metrics.user.background === "rgb(54, 65, 55)", `${prefix}: user panel does not use the muted green palette`);
+    check(metrics.user.radius <= 8, `${prefix}: user panel is not flat`);
     check(contrast(metrics.user.color, metrics.user.background) >= 4.5, `${prefix}: user text contrast below 4.5:1`);
     check(metrics.code.scrollWidth > metrics.code.clientWidth && metrics.code.right <= metrics.assistant.right + 1, `${prefix}: code does not scroll inside its bubble`);
     check(metrics.assistant.font >= (enlarged ? 32 : 16) - .1 && metrics.assistant.font <= (enlarged ? 38 : 19) + .1, `${prefix}: body text outside fluid font range`);
     const typography = await evaluate(`(() => { const body = getComputedStyle(document.querySelector('.answer-text')), heading = getComputedStyle(document.querySelector('.answer-text h3')), code = getComputedStyle(document.querySelector('.answer-text li code')); return { bodySize:body.fontSize, headingSize:heading.fontSize, codeSize:code.fontSize, bodyFont:body.fontFamily, codeFont:code.fontFamily, quote:document.querySelector('.answer-text blockquote')?.textContent, headings:[...document.querySelectorAll('.answer-text h3')].map(e => e.textContent) }; })()`);
     check(typography.bodySize === typography.headingSize && typography.bodySize === typography.codeSize && typography.bodyFont === typography.codeFont, `${prefix}: response typography is inconsistent`);
+    check(typography.bodyFont.includes("Georgia"), `${prefix}: answer does not use the Journal's serif typography`);
     check(typography.quote === "A quoted update 1." && typography.headings.includes("Limitations"), `${prefix}: adjacent Markdown blocks are not separated`);
   }
   results.push({ viewport:[width,height], state:label, font:metrics.input?.font, horizontalOverflow:metrics.documentWidth > metrics.width + 1 });
@@ -290,5 +293,5 @@ try {
   socket?.close();
   for (const child of [browser,app]) if (child && child.exitCode === null) { child.kill("SIGTERM"); await Promise.race([once(child,"exit"),delay(5000)]); if (child.exitCode === null) child.kill("SIGKILL"); }
   if (fixture) { fixture.closeAllConnections(); await new Promise(resolve => fixture.close(resolve)); }
-  await rm(profile,{recursive:true,force:true});
+  await rm(profile,{recursive:true,force:true,maxRetries:5,retryDelay:100});
 }

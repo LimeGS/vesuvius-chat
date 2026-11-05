@@ -1,6 +1,6 @@
 # Release verification
 
-Verified 2026-11-04 using this release's lockfile. These badges are snapshots, not live
+Verified 2026-11-05 using this release's lockfile. These badges are snapshots, not live
 GitHub status or a promise that future dependency audits will remain clean.
 
 | Application metric | Coverage |
